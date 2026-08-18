@@ -33,6 +33,7 @@ import com.kangrio.virtualdisplay.utils.DisplayUtils
 import rikka.shizuku.Shizuku
 import rikka.shizuku.Shizuku.OnRequestPermissionResultListener
 import java.util.SortedMap
+import android.content.Context
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("StaticFieldLeak")
@@ -222,11 +223,6 @@ class MainActivity : AppCompatActivity() {
 
             val componentClassName: String =
                 packageManager?.getLaunchIntentForPackage(packageName)?.component?.className
-            
-            // 修正例
-            val action: String = intent?.action ?: ""
-
-            val component = intent?.component?.className
 
             val appsUtils: AppsUtils = AppsUtils()
 
@@ -332,10 +328,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         textureView!!.setOnTouchListener { view, motionEvent ->
-            motionEvent.displayId = !virtualDisplay!!.display.displayId
+            // SDKのバージョンチェックをしてから代入
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                motionEvent.displayId = virtualDisplay!!.display.displayId
+            }
             sendMotionEvent(motionEvent)
             true
         }
+
     }
 
     private fun createOrUpdateVirtualDisplay() {
