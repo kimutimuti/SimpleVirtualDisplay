@@ -43,7 +43,8 @@ android {
 dependencies {
 
 // Provides stubs for internal system APIs during compilation
-    compileOnly("dev.rikka.hidden.stub:android:34.0.0")
+    compileOnly("dev.rikka.hidden:stub:4.4.0")
+
 
 //    val shizuku_version = "13.1.5"
     val shizuku_version = "13.1.0"
