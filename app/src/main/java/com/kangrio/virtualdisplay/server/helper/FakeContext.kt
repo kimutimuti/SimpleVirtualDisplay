@@ -22,7 +22,7 @@ class FakeContext private constructor() : MutableContextWrapper(null) {
         }
     }
 
-    override fun getUserId(): Int {
+    fun getUserId(): Int {
         return 0
     }
 
@@ -30,7 +30,7 @@ class FakeContext private constructor() : MutableContextWrapper(null) {
         super.setBaseContext(base)
     }
 
-    override fun getDisplayId(): Int {
+    fun getDisplayId(): Int {
         return 0
     }
 
