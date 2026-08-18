@@ -221,8 +221,7 @@ class MainActivity : AppCompatActivity() {
 
         try {
 
-            val componentClassName: String =
-                packageManager?.getLaunchIntentForPackage(packageName)?.component?.className
+            val componentClassName = packageManager?.getLaunchIntentForPackage(packageName)?.component?.className ?: ""
 
             val appsUtils: AppsUtils = AppsUtils()
 
@@ -242,13 +241,15 @@ class MainActivity : AppCompatActivity() {
         return null
     }
 
-    private fun sendMotionEvent(motionEvent: MotionEvent) {
+    // 【修正後】
+    private fun sendMotionEvent(motionEvent: MotionEvent, displayId: Int) {
         try {
-            displayUtils.sendMotionEvent(motionEvent)
+            displayUtils.sendMotionEvent(motionEvent, displayId)
         } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
+
 
     @SuppressLint("WrongConstant")
     fun createVirtualDisplay(surface: Surface?, width: Int, height: Int) {
@@ -327,14 +328,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 【修正後】
         textureView!!.setOnTouchListener { view, motionEvent ->
-            // SDKのバージョンチェックをしてから代入
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                motionEvent.displayId = virtualDisplay!!.display.displayId
-            }
-            sendMotionEvent(motionEvent)
+            // virtualDisplayから直接IDを取得して変数に入れる
+            val currentDisplayId = virtualDisplay?.display?.displayId ?: 0
+            // sendMotionEventの第2引数として渡す
+            sendMotionEvent(motionEvent, currentDisplayId)
             true
         }
+
 
     }
 
