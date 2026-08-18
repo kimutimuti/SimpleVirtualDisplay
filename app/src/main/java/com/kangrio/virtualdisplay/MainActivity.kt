@@ -330,7 +330,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        textureView!!.setOnTouchListener { view, motionEvent ->
+        textureView!!.setOnTouchListenerInt { view, motionEvent ->
             motionEvent.displayId = virtualDisplay!!.display.displayId
             sendMotionEvent(motionEvent)
             true
