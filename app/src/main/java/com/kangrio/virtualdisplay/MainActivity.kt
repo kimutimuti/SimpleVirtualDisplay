@@ -161,26 +161,30 @@ class MainActivity : AppCompatActivity() {
             )
             spinner!!.setAdapter(adapter)
 
-            spinner!!.setOnItemClickListener(OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
-                val packageName = sortedInstalledApps!!.values.toList()[position]
-                editText!!.setText(packageName)
-                val app: PackageInfo
+            spinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val packageName = sortedInstalledApps!!.values.toList()[position]
+                    editText!!.setText(packageName)
+    
+                    val app: PackageInfo
+                    try {
+                        app = packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        e.printStackTrace()
+                        return
+                    }
 
-                try {
-                    app = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    throw RuntimeException(e)
+                    val requestedPermissions = app.requestedPermissions ?: return
+
+                    val index = listOf(*requestedPermissions).indexOf(Manifest.permission.WRITE_SECURE_SETTINGS)
+                    if (index == -1) return
                 }
 
-                val requestedPermissions =
-                    app.requestedPermissions ?: // No permissions defined in <manifest>
-                    return@OnItemClickListener
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    // 何も選択されなかったときの処理（空のままで問題ありません）
+                }
+            }
 
-                val index = listOf(*requestedPermissions)
-                    .indexOf(Manifest.permission.WRITE_SECURE_SETTINGS)
-
-                if (index == -1) return@OnItemClickListener
-            })
 
         }
     }
