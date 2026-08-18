@@ -221,11 +221,12 @@ class MainActivity : AppCompatActivity() {
         try {
 
             val componentClassName: String =
-                packageManager.getLaunchIntentForPackage(packageName).component.className
+                packageManager?.getLaunchIntentForPackage(packageName)?.component?.className
 
             // Example of a safe call fix
-            val action = intent?.action?.
-            val component = intent?.component?.className?.
+            val action = intent?.action
+            
+            val component = intent?.component?.className
 
             val appsUtils: AppsUtils = AppsUtils()
 
@@ -330,7 +331,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        textureView!!.setOnTouchListenerInt { view, motionEvent ->
+        textureView!!.setOnTouchListener { view, motionEvent ->
             motionEvent.displayId = virtualDisplay!!.display.displayId
             sendMotionEvent(motionEvent)
             true
