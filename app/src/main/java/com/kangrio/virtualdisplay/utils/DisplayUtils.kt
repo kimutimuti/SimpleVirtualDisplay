@@ -4,31 +4,51 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
-import android.hardware.input.IInputManager
-import android.hardware.input.InputManager
 import android.util.Log
 import android.view.MotionEvent
 import android.view.Surface
 import com.kangrio.virtualdisplay.App
 import com.kangrio.virtualdisplay.MainActivity
-import rikka.shizuku.ShizukuBinderWrapper
-import rikka.shizuku.SystemServiceHelper
+import com.kangrio.virtualdisplay.helper.ShizukuHelper
 
 class DisplayUtils {
     private val TAG = "DisplayUtils"
-
-    private val iInputManager: IInputManager =
-        IInputManager.Stub.asInterface(
-            ShizukuBinderWrapper(SystemServiceHelper.getSystemService(Context.INPUT_SERVICE))
-        )
-
+    private val shizukuHelper = ShizukuHelper()
     private val handler = App.handler
 
+    // Shizuku経由のシェルコマンド(input)でタッチイベントを送信する
     fun sendMotionEvent(motionEvent: MotionEvent) {
-        iInputManager.injectInputEvent(
-            motionEvent,
-            InputManager.INJECT_INPUT_EVENT_MODE_ASYNC
-        )
+        val action = motionEvent.actionMasked
+        val x = motionEvent.x
+        val y = motionEvent.y
+        // displayId が設定されている場合は、そのディスプレイに対して入力を送る（Android 10以降）
+        val displayArg = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && motionEvent.displayId != -1) {
+            "-d ${motionEvent.displayId}"
+        } else {
+            ""
+        }
+
+        var cmd = ""
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                // シンプルなタップとして処理（スワイプなどの複雑なジェスチャーはシェルコマンドでは完全再現が難しいため簡易化）
+                cmd = "input $displayArg tap $x $y"
+            }
+            // MotionEvent.ACTION_MOVE など他のイベントも必要に応じてコマンド化できますが、
+            // コマンドのオーバーヘッドが大きいため、まずはACTION_DOWN(タップ)のみで動作確認を推奨します。
+        }
+
+        if (cmd.isNotEmpty()) {
+             Log.d(TAG, "sendMotionEvent: $cmd")
+             try {
+                 // 別スレッドでコマンドを実行
+                 Thread {
+                     shizukuHelper.execInternal(cmd)
+                 }.start()
+             } catch (e: Throwable) {
+                 e.printStackTrace()
+             }
+        }
     }
 
 
@@ -50,7 +70,8 @@ class DisplayUtils {
 
         Log.d(TAG, "createVirtualDisplay: density = $density")
 
-        displayManager = DisplayManager(App.applicationContext())
+        // 隠しAPIのコンストラクタではなく、SystemServiceから取得する
+        displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
 
         if (virtualDisplay != null) virtualDisplay!!.release()
 
