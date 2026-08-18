@@ -16,14 +16,15 @@ class DisplayUtils {
     private val shizukuHelper = ShizukuHelper()
     private val handler = App.handler
 
-    // Shizuku経由のシェルコマンド(input)でタッチイベントを送信する
-    fun sendMotionEvent(motionEvent: MotionEvent) {
+    // 【修正後】
+    fun sendMotionEvent(motionEvent: MotionEvent, displayId: Int) {
         val action = motionEvent.actionMasked
         val x = motionEvent.x
         val y = motionEvent.y
-        // displayId が設定されている場合は、そのディスプレイに対して入力を送る（Android 10以降）
-        val displayArg = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q && motionEvent.displayId != -1) {
-            "-d ${motionEvent.displayId}"
+
+        // 引数で受け取った displayId を直接使う
+        val displayArg = if (displayId != 0 && displayId != -1) {
+            "-d $displayId"
         } else {
             ""
         }
@@ -31,23 +32,19 @@ class DisplayUtils {
         var cmd = ""
         when (action) {
             MotionEvent.ACTION_DOWN -> {
-                // シンプルなタップとして処理（スワイプなどの複雑なジェスチャーはシェルコマンドでは完全再現が難しいため簡易化）
                 cmd = "input $displayArg tap $x $y"
             }
-            // MotionEvent.ACTION_MOVE など他のイベントも必要に応じてコマンド化できますが、
-            // コマンドのオーバーヘッドが大きいため、まずはACTION_DOWN(タップ)のみで動作確認を推奨します。
         }
 
         if (cmd.isNotEmpty()) {
-             Log.d(TAG, "sendMotionEvent: $cmd")
-             try {
-                 // 別スレッドでコマンドを実行
-                 Thread {
-                     shizukuHelper.execInternal(cmd)
-                 }.start()
-             } catch (e: Throwable) {
-                 e.printStackTrace()
-             }
+            Log.d(TAG, "sendMotionEvent: $cmd")
+            try {
+                Thread {
+                    shizukuHelper.execInternal(cmd)
+                }.start()
+            } catch (e: Throwable) {
+                e.printStackTrace()
+            }
         }
     }
 
