@@ -160,7 +160,7 @@ class MainActivity : AppCompatActivity() {
             )
             spinner!!.setAdapter(adapter)
 
-            spinner!!.setOnItemClickListenerInt(OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
+            spinner!!.setOnItemClickListener(OnItemClickListener { parent: AdapterView<*>?, view: View?, position: Int, id: Long ->
                 val packageName = sortedInstalledApps!!.values.toList()[position]
                 editText!!.setText(packageName)
                 val app: PackageInfo
