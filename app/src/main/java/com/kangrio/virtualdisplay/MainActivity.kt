@@ -98,8 +98,8 @@ class MainActivity : AppCompatActivity() {
         }
         Shizuku.addRequestPermissionResultListener(REQUEST_PERMISSION_RESULT_LISTENER)
 
-        displayManager = DisplayManager(this)
-
+        displayManager = getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        
         btnStartApp = findViewById(R.id.btnStartApp)
         btnKillApp = findViewById(R.id.btnKillApp)
         editText = findViewById(R.id.editTextText)
@@ -222,10 +222,10 @@ class MainActivity : AppCompatActivity() {
 
             val componentClassName: String =
                 packageManager?.getLaunchIntentForPackage(packageName)?.component?.className
-
-            // Example of a safe call fix
-            val action = intent?.action
             
+            // 修正例
+            val action: String = intent?.action ?: ""
+
             val component = intent?.component?.className
 
             val appsUtils: AppsUtils = AppsUtils()
@@ -332,7 +332,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         textureView!!.setOnTouchListener { view, motionEvent ->
-            motionEvent.displayId = virtualDisplay!!.display.displayId
+            motionEvent.displayId = !virtualDisplay!!.display.displayId
             sendMotionEvent(motionEvent)
             true
         }
