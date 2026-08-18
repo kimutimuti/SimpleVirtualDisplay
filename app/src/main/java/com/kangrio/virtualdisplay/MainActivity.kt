@@ -223,6 +223,10 @@ class MainActivity : AppCompatActivity() {
             val componentClassName: String =
                 packageManager.getLaunchIntentForPackage(packageName).component.className
 
+            // Example of a safe call fix
+            val action = intent?.action 
+            val component = intent?.component?.className
+
             val appsUtils: AppsUtils = AppsUtils()
 
             appsUtils.launchAppTargetDisplay(packageName, componentClassName, displayId)
